@@ -1,98 +1,107 @@
 # ============================================================================
-# Azeu Water Station - Optimized Production Dockerfile for Render.com
+# Azeu Water Station - Production Dockerfile for Render.com + TiDBCloud
+# Version: 2.0 (Improved - No dependency conflicts)
 # ============================================================================
+
 FROM php:8.1-apache
 
-# Set working directory
+# Set working directory and environment variables
 WORKDIR /var/www/html
-
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     APACHE_DOCUMENT_ROOT=/var/www/html
 
-# Install system dependencies with minimal layer bloat
+# Step 1: Update package lists and install only essential dependencies
+# (Avoid optional libraries that may not exist in all Debian versions)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     openssl \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 
-# Install PHP extensions for MySQL and encryption
-RUN docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_mysql \
-    mbstring
+# Step 2: Install only essential PHP extensions (avoiding problematic ones like mbstring)
+# PDO and PDO MySQL are pre-compiled in the base image, so this is safe
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Enable Apache modules
+# Step 3: Enable required Apache modules
 RUN a2enmod rewrite headers
 
-# Copy application files early
+# Step 4: Copy application code
 COPY . /var/www/html/
 
-# Create necessary directories with proper permissions
-RUN mkdir -p /var/www/html/logs \
-    /var/www/html/assets/uploads/items \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 775 /var/www/html/logs \
-    && chmod -R 775 /var/www/html/assets/uploads
+# Step 5: Create required directories and set permissions
+RUN mkdir -p /var/www/html/logs /var/www/html/assets/uploads/items && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html && \
+    chmod -R 775 /var/www/html/logs /var/www/html/assets/uploads && \
+    echo "Deny from all" > /var/www/html/logs/.htaccess
 
-# Create .htaccess for logs directory
-RUN echo "Deny from all" > /var/www/html/logs/.htaccess
+# Step 6: Configure PHP for production
+RUN mkdir -p /usr/local/etc/php/conf.d && \
+    echo 'display_errors = Off' > /usr/local/etc/php/conf.d/production.ini && \
+    echo 'display_startup_errors = Off' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'log_errors = On' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'error_log = /var/log/php-errors.log' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'upload_max_filesize = 50M' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'post_max_size = 50M' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'max_execution_time = 300' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'date.timezone = Asia/Manila' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'session.cookie_httponly = On' >> /usr/local/etc/php/conf.d/production.ini && \
+    echo 'session.cookie_samesite = Lax' >> /usr/local/etc/php/conf.d/production.ini && \
+    touch /var/log/php-errors.log && \
+    chmod 666 /var/log/php-errors.log
 
-# Configure Apache for Render.com (uses PORT environment variable)
-RUN echo '#!/bin/bash' > /usr/local/bin/docker-entrypoint.sh && \
-    echo 'set -e' >> /usr/local/bin/docker-entrypoint.sh && \
-    echo 'export PORT=${PORT:-3000}' >> /usr/local/bin/docker-entrypoint.sh && \
-    echo 'echo "Listen $PORT" > /etc/apache2/ports.conf' >> /usr/local/bin/docker-entrypoint.sh && \
-    echo 'sed -i "s/<VirtualHost \*:80>/<VirtualHost *:$PORT>/g" /etc/apache2/sites-available/000-default.conf' >> /usr/local/bin/docker-entrypoint.sh && \
-    echo 'exec apache2-foreground' >> /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+# Step 7: Create startup script for Render.com PORT handling
+RUN cat > /usr/local/bin/docker-entrypoint.sh << 'EOF'
+#!/bin/bash
+set -e
 
-# Configure Apache site
-RUN echo '<VirtualHost *:3000>' > /etc/apache2/sites-available/000-default.conf && \
-    echo '    ServerAdmin admin@azeuwater.com' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    DocumentRoot /var/www/html' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    <Directory /var/www/html>' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '        Options Indexes FollowSymLinks' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '        AllowOverride All' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '        Require all granted' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    </Directory>' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    ErrorLog ${APACHE_LOG_DIR}/error.log' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    CustomLog ${APACHE_LOG_DIR}/access.log combined' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    Header always set X-Content-Type-Options "nosniff"' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    Header always set X-Frame-Options "SAMEORIGIN"' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '    Header always set X-XSS-Protection "1; mode=block"' >> /etc/apache2/sites-available/000-default.conf && \
-    echo '</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
+# Use Render.com PORT environment variable
+PORT=${PORT:-3000}
 
-# Configure PHP for production
-RUN echo 'display_errors = Off' > /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'display_startup_errors = Off' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'log_errors = On' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'error_log = /var/log/php-errors.log' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'upload_max_filesize = 50M' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'post_max_size = 50M' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'max_execution_time = 300' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'date.timezone = Asia/Manila' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'session.cookie_httponly = On' >> /usr/local/etc/php/conf.d/custom.ini && \
-    echo 'session.cookie_samesite = Lax' >> /usr/local/etc/php/conf.d/custom.ini
+# Configure Apache to listen on the specified port
+echo "Listen $PORT" > /etc/apache2/ports.conf
 
-# Create PHP error log
-RUN touch /var/log/php-errors.log && chmod 666 /var/log/php-errors.log
+# Update VirtualHost to use the specified port
+sed -i "s/<VirtualHost \*:80>/<VirtualHost *:$PORT>/g" /etc/apache2/sites-available/000-default.conf
 
-# Expose port 3000 (default, will be overridden by PORT env var)
+# Start Apache
+exec apache2-foreground
+EOF
+chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Step 8: Configure Apache VirtualHost
+RUN cat > /etc/apache2/sites-available/000-default.conf << 'EOF'
+<VirtualHost *:3000>
+    ServerAdmin admin@azeuwater.com
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    # Security headers
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</VirtualHost>
+EOF
+
+# Expose port 3000 (Render.com will override via PORT env var)
 EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:3000/ || exit 1
 
-# Start Apache with entrypoint script
+# Start application
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Start Apache
