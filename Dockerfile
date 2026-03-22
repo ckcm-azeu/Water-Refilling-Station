@@ -10,17 +10,20 @@ WORKDIR /var/www/html
 ENV DEBIAN_FRONTEND=noninteractive \
     APACHE_DOCUMENT_ROOT=/var/www/html
 
-# Install system dependencies with minimal layer bloat
+# Install system dependencies including required build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     openssl \
     git \
-    liboniguruma-dev \
+    build-essential \
+    autoconf \
+    oniguruma-source \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions for MySQL and encryption
-RUN docker-php-ext-install -j$(nproc) \
+RUN docker-php-ext-configure mbstring --enable-mbstring && \
+    docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
     mbstring
