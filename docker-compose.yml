@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      # Database Configuration (TiDBCloud)
+      - DB_HOST=gateway01.ap-southeast-1.prod.aws.tidbcloud.com
+      - DB_PORT=4000
+      - DB_NAME=${DB_NAME:-waterstation_db}
+      - DB_USER=${DB_USER:-your_username.root}
+      - DB_PASS=${DB_PASS:-your_password}
+      - DB_SSL_ENABLED=true
+      
+      # Application Settings
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change_this_to_random_32_chars}
+     - DEBUG_MODE=${DEBUG_MODE:-false}
+      - TIMEZONE=Asia/Manila
+      
+      # System Settings
+      - STATION_NAME=Azeu Water Station
+      - DELIVERY_FEE=50.00
+      - MAX_CANCELLATION=5
+      
+      # Port for Apache
+      - PORT=80
+    volumes:
+      # Mount logs directory for persistence (optional for local testing)
+      - ./logs:/var/www/html/logs
+      # Mount uploads directory for persistence
+      - ./assets/uploads:/var/www/html/assets/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/maintenance.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Optional: For local MySQL development instead of TiDBCloud
+  # mysql:
+  #   image: mysql:8.0
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #     - MYSQL_DATABASE=station_azeu
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+
+# volumes:
+#   mysql_data:

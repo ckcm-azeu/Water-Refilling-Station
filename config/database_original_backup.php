@@ -2,7 +2,6 @@
 /**
  * Azeu Water Station - Database Connection & Setup
  * Auto-creates all tables and seeds initial data
- * UPDATED: Now supports TiDBCloud with SSL/TLS connections
  */
 
 require_once __DIR__ . '/constants.php';
@@ -13,53 +12,26 @@ require_once __DIR__ . '/AESCrypt.php';
 global $pdo;
 
 try {
-    // Get database configuration from environment variables or constants
-    $db_host = getenv('DB_HOST') ?: DB_HOST;
-    $db_port = getenv('DB_PORT') ?: '3306';
-    $db_name = getenv('DB_NAME') ?: DB_NAME;
-    $db_user = getenv('DB_USER') ?: DB_USER;
-    $db_pass = getenv('DB_PASS') ?: DB_PASS;
-    $db_ssl_enabled = getenv('DB_SSL_ENABLED') === 'true' || getenv('DB_SSL_ENABLED') === '1';
-
-    // Build DSN
-    $dsn = "mysql:host={$db_host};port={$db_port};charset=utf8mb4";
-
-    // PDO options - base configuration
-    $options = [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-        PDO::ATTR_PERSISTENT => false,
-    ];
-
-    // Add SSL/TLS options for TiDBCloud or other cloud databases
-    if ($db_ssl_enabled) {
-        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-        $options[PDO::MYSQL_ATTR_SSL_CA] = true;
-
-        // Optional: If you have a custom SSL CA certificate
-        $ssl_ca = getenv('DB_SSL_CA');
-        if ($ssl_ca && file_exists($ssl_ca)) {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = $ssl_ca;
-        }
-    }
-
     // Connect to MySQL
-    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
-
-    logger_info("Database connection established to {$db_host}");
-
-    // For TiDBCloud or cloud databases, the database should already exist
-    // Only attempt to create database if using local MySQL
-    if (!$db_ssl_enabled && strpos($db_host, 'localhost') !== false) {
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$db_name}`");
-        logger_info("Created database (if not exists): {$db_name}");
-    }
-
-    // Switch to the database
-    $pdo->exec("USE `{$db_name}`");
-    logger_info("Using database: {$db_name}");
-
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ]
+    );
+    
+    logger_info("Database connection established");
+    
+    // Create database if not exists
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS " . DB_NAME);
+    $pdo->exec("USE " . DB_NAME);
+    
+    logger_info("Using database: " . DB_NAME);
+    
 } catch (PDOException $e) {
     // Try to log if logger is available
     if (function_exists('logger_critical')) {
@@ -202,10 +174,9 @@ try {
             <div class="error-details">
                 <h3>Please check the following:</h3>
                 <ul>
-                    <li><span class="material-icons">check_circle</span> MySQL service is running (or TiDBCloud cluster is active)</li>
-                    <li><span class="material-icons">check_circle</span> Database credentials are correct</li>
-                    <li><span class="material-icons">check_circle</span> SSL is enabled if using TiDBCloud (DB_SSL_ENABLED=true)</li>
-                    <li><span class="material-icons">check_circle</span> Database exists (must be created manually in TiDBCloud)</li>
+                    <li><span class="material-icons">check_circle</span> MySQL service is running (XAMPP Control Panel)</li>
+                    <li><span class="material-icons">check_circle</span> Database credentials in config/constants.php</li>
+                    <li><span class="material-icons">check_circle</span> MySQL port is not blocked (default: 3306)</li>
                 </ul>
             </div>
 
@@ -241,7 +212,7 @@ seed_initial_data();
  */
 function create_all_tables() {
     global $pdo;
-
+    
     // Table 1: users
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -266,7 +237,7 @@ function create_all_tables() {
         INDEX idx_status (status)
     ) ENGINE=InnoDB");
     logger_debug("Table 'users' checked/created");
-
+    
     // Table 2: user_preferences
     $pdo->exec("CREATE TABLE IF NOT EXISTS user_preferences (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -278,7 +249,7 @@ function create_all_tables() {
         CONSTRAINT fk_user_pref FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB");
     logger_debug("Table 'user_preferences' checked/created");
-
+    
     // Table 3: customer_addresses
     $pdo->exec("CREATE TABLE IF NOT EXISTS customer_addresses (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -292,7 +263,7 @@ function create_all_tables() {
         CONSTRAINT fk_addr_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB");
     logger_debug("Table 'customer_addresses' checked/created");
-
+    
     // Table 4: inventory
     $pdo->exec("CREATE TABLE IF NOT EXISTS inventory (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -307,7 +278,7 @@ function create_all_tables() {
         INDEX idx_status (status)
     ) ENGINE=InnoDB");
     logger_debug("Table 'inventory' checked/created");
-
+    
     // Table 5: orders
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -341,7 +312,7 @@ function create_all_tables() {
         CONSTRAINT fk_order_cancelled FOREIGN KEY (cancelled_by) REFERENCES users(id)
     ) ENGINE=InnoDB");
     logger_debug("Table 'orders' checked/created");
-
+    
     // Migrate: add 'reassign_requested' to orders.status ENUM if not present
     try {
         $col = $pdo->query("SHOW COLUMNS FROM orders LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
@@ -352,7 +323,7 @@ function create_all_tables() {
     } catch (Exception $e) {
         logger_warning("Could not migrate orders.status ENUM: " . $e->getMessage());
     }
-
+    
     // Table 6: order_items
     $pdo->exec("CREATE TABLE IF NOT EXISTS order_items (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -370,7 +341,7 @@ function create_all_tables() {
         CONSTRAINT fk_item_inventory FOREIGN KEY (inventory_id) REFERENCES inventory(id)
     ) ENGINE=InnoDB");
     logger_debug("Table 'order_items' checked/created");
-
+    
     // Table 7: notifications
     $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -386,7 +357,7 @@ function create_all_tables() {
         CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB");
     logger_debug("Table 'notifications' checked/created");
-
+    
     // Table 8: session_logs
     $pdo->exec("CREATE TABLE IF NOT EXISTS session_logs (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -401,7 +372,7 @@ function create_all_tables() {
         CONSTRAINT fk_log_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     ) ENGINE=InnoDB");
     logger_debug("Table 'session_logs' checked/created");
-
+    
     // Table 9: settings
     $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -410,7 +381,7 @@ function create_all_tables() {
         updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB");
     logger_debug("Table 'settings' checked/created");
-
+    
     // Table 10: default_items
     $pdo->exec("CREATE TABLE IF NOT EXISTS default_items (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -418,7 +389,7 @@ function create_all_tables() {
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB");
     logger_debug("Table 'default_items' checked/created");
-
+    
     // Table 11: cancellation_appeals
     $pdo->exec("CREATE TABLE IF NOT EXISTS cancellation_appeals (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -436,7 +407,7 @@ function create_all_tables() {
         CONSTRAINT fk_appeal_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id)
     ) ENGINE=InnoDB");
     logger_debug("Table 'cancellation_appeals' checked/created");
-
+    
     // Table 12: password_resets
     $pdo->exec("CREATE TABLE IF NOT EXISTS password_resets (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -449,7 +420,7 @@ function create_all_tables() {
         INDEX idx_email (email)
     ) ENGINE=InnoDB");
     logger_debug("Table 'password_resets' checked/created");
-
+    
     // Table 13: delivery_priority
     $pdo->exec("CREATE TABLE IF NOT EXISTS delivery_priority (
         id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -463,7 +434,7 @@ function create_all_tables() {
         CONSTRAINT fk_priority_order FOREIGN KEY (order_id) REFERENCES orders(id)
     ) ENGINE=InnoDB");
     logger_debug("Table 'delivery_priority' checked/created");
-
+    
     logger_info("All tables created/verified successfully");
 }
 
@@ -472,7 +443,7 @@ function create_all_tables() {
  */
 function seed_initial_data() {
     global $pdo;
-
+    
     // Seed settings
     $stmt = $pdo->query("SELECT COUNT(*) FROM settings");
     if ($stmt->fetchColumn() == 0) {
@@ -495,39 +466,39 @@ function seed_initial_data() {
             'delivery_fee' => '50.00',
             'login_lockout_minutes' => '15'
         ];
-
+        
         $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)");
         foreach ($defaultSettings as $key => $value) {
             $stmt->execute([$key, $value]);
         }
         logger_info("Default settings seeded");
     }
-
+    
     // Seed super admin
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'super_admin'");
     if ($stmt->fetchColumn() == 0) {
         // Check if encryption is enabled
         $encryptPasswordsSetting = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'encrypt_passwords'")->fetchColumn();
         $encryptPasswords = $encryptPasswordsSetting == '1';
-
+        
         $password = 'admin';
         if ($encryptPasswords) {
             $password = encrypt($password, ENCRYPTION_KEY);
         }
-
-        $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, phone, role, status)
+        
+        $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, phone, role, status) 
                               VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute(['admin', $password, 'System Administrator', 'admin@azeu.com', '0000000000', 'super_admin', 'active']);
-
+        
         $adminId = $pdo->lastInsertId();
-
+        
         // Create user preferences for super admin
         $stmt = $pdo->prepare("INSERT INTO user_preferences (user_id, dark_mode) VALUES (?, ?)");
         $stmt->execute([$adminId, 0]);
-
+        
         logger_info("Super admin account seeded (username: admin, password: admin)");
     }
-
+    
     // Seed default items
     $stmt = $pdo->query("SELECT COUNT(*) FROM default_items");
     if ($stmt->fetchColumn() == 0) {
@@ -543,7 +514,7 @@ function seed_initial_data() {
             'Water Container 30L',
             'Water Container 20L'
         ];
-
+        
         $stmt = $pdo->prepare("INSERT INTO default_items (item_name) VALUES (?)");
         foreach ($defaultItems as $item) {
             $stmt->execute([$item]);
@@ -580,16 +551,16 @@ function run_migrations() {
  */
 function db_query($sql, $params = []) {
     global $pdo;
-
+    
     $start = microtime(true);
-
+    
     try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
-
+        
         $duration = round((microtime(true) - $start) * 1000, 2);
         logger_query($sql, $params, $duration);
-
+        
         return $stmt;
     } catch (PDOException $e) {
         logger_error("Database query failed: " . $e->getMessage(), ['sql' => $sql]);

@@ -1,0 +1,73 @@
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# Logs
+logs/*.txt
+logs/*.log
+!logs/.htaccess
+
+# Uploaded Files
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+# Vendor (if using Composer)
+vendor/
+!vendor/PHPMailer/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary Files
+tmp/
+temp/
+cache/
+
+# Database Dumps
+*.sql
+*.sql.gz
+*.dump
+
+# Backup Files
+*.bak
+*.backup
+
+# Node modules (if any)
+node_modules/
+
+# Docker
+.dockerignore.backup
+
+# Session Files
+sessions/
+
+# Error Files
+php_errors.log
+error_log
+
+# Test Files
+test.php
+test_*.php
+debug.php
+
+# Setup Files (should be removed in production)
+setup_db_test.php
+full-setup.php
+
+# Personal Notes
+notes.txt
+TODO.txt
+
+# Git files
+.git/
+.gitattributes

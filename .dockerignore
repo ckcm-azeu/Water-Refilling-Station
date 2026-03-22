@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+logs/*.txt
+logs/*.log
+
+# Uploads (will be created at runtime)
+assets/uploads/*
+
+# Vendor (if using Composer locally)
+vendor/
+composer.lock
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test files
+test.php
+test_*.php
+debug.php
+setup_db_test.php
+
+# Temporary
+tmp/
+temp/
+cache/
+
+# Docker
+Dockerfile.backup
+docker-compose.yml
+.dockerignore
