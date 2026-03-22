@@ -1,32 +1,122 @@
-# Environment Variables
-.env
-.env.local
-.env.production
+# ============================================================================
+# Git Ignore Configuration - Azeu Water Station Deployment
+# ============================================================================
 
-# Logs
-logs/*.txt
-logs/*.log
-!logs/.htaccess
+# ── SENSITIVE FILES & CREDENTIALS ────────────────────────────────────────────
+.env                           # Never commit secrets
+.env.local                     # Local configuration
+.env.*.local                   # Environment-specific
+config/database_local.php      # Local database config
+config/*local*                 # Any local overrides
 
-# Uploaded Files
-assets/uploads/*
-!assets/uploads/.gitkeep
+# ── APPLICATION LOGS & CACHE ────────────────────────────────────────────────
+logs/                          # Application logs
+logs/*.txt                     # Log files
+logs/*.log                     # Error logs
+!logs/.htaccess                # Keep security restriction
+cache/                         # Cache directory
+tmp/                           # Temporary files
 
-# Vendor (if using Composer)
-vendor/
-!vendor/PHPMailer/
+# ── UPLOADS & MEDIA (Generated) ──────────────────────────────────────────────
+assets/uploads/               # User uploaded files
+assets/uploads/items/*        # Generated item icons
+!assets/uploads/.gitkeep      # Keep directory in git
+!assets/images/               # Keep default images
 
-# OS Files
-.DS_Store
-Thumbs.db
-desktop.ini
+# ── IDE & EDITOR FILES ──────────────────────────────────────────────────────
+.vscode/                       # VS Code settings
+.idea/                         # PHPStorm/IntelliJ IDEA
+*.sublime-project             # Sublime Text projects
+*.sublime-workspace           # Sublime workspace
+.swp                          # Vim swap files
+.swo                          # Vim backup files
+*~                            # Vim crash files
 
-# IDE Files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# ── OS FILES ─────────────────────────────────────────────────────────────────
+.DS_Store                      # macOS metadata
+Thumbs.db                      # Windows thumbnails
+desktop.ini                    # Windows desktop config
+.directory                     # Linux desktop metadata
+
+# ── DEPENDENCY MANAGERS ──────────────────────────────────────────────────────
+vendor/                        # Composer packages (exclude except PHPMailer)
+!vendor/PHPMailer/             # Keep required PHPMailer
+node_modules/                 # NPM packages (if any)
+package-lock.json             # NPM lock file
+composer.lock                 # Composer lock file
+
+# ── DEVELOPMENT & TESTING ────────────────────────────────────────────────────
+test_*.php                    # Test files (test_db.php, test_login.php)
+setup_db_test.php             # Testing database setup
+sandbox/                      # Sandbox environment
+testing/                      # Testing-only files
+
+# ── BACKUP & TEMPORARY FILES ────────────────────────────────────────────────────
+*.bak                         # Backup files
+*.backup                      # Backup copies
+*.swp                         # Editor swap files
+*.orig                        # Merge conflict originals
+database_backup.*             # Database backups
+*.sql.bak                     # SQL backups
+
+# ── PROJECT NOTES (DO NOT DEPLOY) ───────────────────────────────────────────
+ignore/                       # All files in ignore folder
+prompts/                      # Prompt templates
+notes.txt                     # Development notes
+TODO.md                       # Todo lists
+DEVELOPMENT.md                # Development documentation
+
+# ── DOCKER ──────────────────────────────────────────────────────────────────
+.dockerignore                 # Docker ignore
+docker-compose.override.yml   # Local docker overrides
+docker-compose.local.yml      # Local docker compose
+.docker/                      # Docker build cache
+
+# ── SECURITY FILES ──────────────────────────────────────────────────────────
+*.pem                         # Private keys
+*.key                         # Encryption keys
+*.crt                         # Certificates
+*.p8                          # Private keys
+.ssh/                         # SSH keys
+.gpg/                         # GPG keys
+
+# ── BUILD & DEPLOYMENT ──────────────────────────────────────────────────────
+build/                        # Build output
+dist/                         # Distribution files
+out/                          # Output files
+
+# ── ARCHIVES & BINARIES ──────────────────────────────────────────────────────
+*.zip                         # ZIP archives
+*.tar                         # Tar archives
+*.tar.gz                      # Gzipped tar
+*.rar                         # RAR archives
+*.exe                         # Windows executables
+*.dll                         # Windows DLLs
+*.so                          # Linux shared objects
+*.dylib                       # macOS shared objects
+
+# ── DATABASE FILES ──────────────────────────────────────────────────────────
+*.db                          # SQLite databases
+*.sqlite                      # SQLite files
+*.sqlite3                     # SQLite3 files
+
+# ── VERSION CONTROL ─────────────────────────────────────────────────────────
+.git/                         # Git repository (usually auto-excluded)
+.gitkeep                      # Git keep markers (deploy but don't track)
+
+# ── SYSTEM GENERATED ────────────────────────────────────────────────────────
+Thumbs.db                     # Windows image cache
+.AppleDouble                  # macOS resource forks
+.LSOverride                   # macOS Finder metadata
+Icon                          # macOS icon file
+ehthumbs.db                   # Explorer cache
+
+# ── EXCEPTION: Include essential vendor files ────────────────────────────────
+# Uncomment if using Composer dependencies:
+# vendor/
+# !vendor/PHPMailer/
+# !vendor/autoload.php
+
 
 # Temporary Files
 tmp/
