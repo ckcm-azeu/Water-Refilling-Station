@@ -18,9 +18,9 @@ services:
       
       # Application Settings
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change_this_to_random_32_chars}
-     - DEBUG_MODE=${DEBUG_MODE:-false}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
       - TIMEZONE=Asia/Manila
-      
+
       # System Settings
       - STATION_NAME=Azeu Water Station
       - DELIVERY_FEE=50.00
