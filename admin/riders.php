@@ -176,7 +176,7 @@ function initFilterButtons() {
 
 async function loadRiders() {
     try {
-        const response = await fetch('../api/riders/list.php');
+        const response = await fetch('../api/riders/list.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success && data.riders.length > 0) {

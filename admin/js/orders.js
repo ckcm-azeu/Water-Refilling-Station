@@ -73,7 +73,7 @@ function initFilterButtons() {
 async function loadOrders() {
     try {
         const url = currentFilter ? `../api/orders/list.php?status=${currentFilter}` : '../api/orders/list.php';
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -304,7 +304,7 @@ async function loadOrderItems(orderId) {
     if (!itemsBox && !cardItems) return;
     
     try {
-        const response = await fetch(`../api/orders/get.php?id=${orderId}`);
+        const response = await fetch(`../api/orders/get.php?id=${orderId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success && data.items) {
@@ -397,7 +397,7 @@ function nextPage() {
 
 async function viewOrder(orderId) {
     try {
-        const response = await fetch(`../api/orders/get.php?id=${orderId}`);
+        const response = await fetch(`../api/orders/get.php?id=${orderId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -646,6 +646,7 @@ async function updateOrderStatus(orderId, status) {
         const response = await fetch('../api/orders/update_status.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ order_id: orderId, status, csrf_token: getCSRFToken() })
         });
         
@@ -700,7 +701,7 @@ function showAssignRider(orderId) {
 
 async function loadRiders() {
     try {
-        const response = await fetch('../api/riders/list.php');
+        const response = await fetch('../api/riders/list.php', { credentials: 'include' });
         const data = await response.json();
         
         const selectOptions = document.getElementById('rider-options');
@@ -815,6 +816,7 @@ async function assignRider(e) {
         const response = await fetch('../api/orders/assign_rider.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ order_id: orderId, rider_id: riderId, csrf_token: getCSRFToken() })
         });
         
@@ -882,6 +884,7 @@ async function confirmAllPending() {
             const response = await fetch('../api/orders/update_status.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ order_id: order.id, status: 'confirmed', csrf_token: getCSRFToken() })
             });
             const data = await response.json();
@@ -923,6 +926,7 @@ async function autoAssignRiders() {
             const response = await fetch('../api/orders/auto_assign.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ order_id: order.id, csrf_token: getCSRFToken() })
             });
             const data = await response.json();
@@ -971,6 +975,7 @@ async function cancelAllCancellable() {
             const response = await fetch('../api/orders/cancel.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ order_id: order.id, reason: result.value, csrf_token: getCSRFToken() })
             });
             const data = await response.json();
@@ -1019,6 +1024,7 @@ async function cancelByStatus(status) {
             const response = await fetch('../api/orders/cancel.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ order_id: order.id, reason: result.value, csrf_token: getCSRFToken() })
             });
             const data = await response.json();
@@ -1105,6 +1111,7 @@ async function assignRiderBulk(e) {
             const response = await fetch('../api/orders/assign_rider.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ order_id: order.id, rider_id: riderId, csrf_token: getCSRFToken() })
             });
             const data = await response.json();

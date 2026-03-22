@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadSettings() {
     try {
-        const response = await fetch('../api/settings/get.php');
+        const response = await fetch('../api/settings/get.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -98,6 +98,7 @@ async function saveSettings(e) {
         const response = await fetch('../api/settings/update.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 settings: settings,
                 csrf_token: getCSRFToken()
@@ -173,6 +174,7 @@ function initLogoUpload() {
         try {
             const response = await fetch('../api/settings/upload_logo.php', {
                 method: 'POST',
+                credentials: 'include',
                 body: formData
             });
 

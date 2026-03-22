@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', loadRiderStats);
 
 async function loadRiderStats() {
     try {
-        const response = await fetch('../api/riders/list.php');
+        const response = await fetch('../api/riders/list.php', { credentials: 'include' });
         const data = await response.json();
         
         const container = document.getElementById('riders-stats-container');

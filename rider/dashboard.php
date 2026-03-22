@@ -592,7 +592,7 @@ function setGreeting() {
 
 async function loadDashboardStats() {
     try {
-        const response = await fetch('../api/analytics/dashboard.php');
+        const response = await fetch('../api/analytics/dashboard.php', { credentials: 'include' });
         const data = await response.json();
 
         if (data.success) {
@@ -628,7 +628,7 @@ async function initAvailabilityToggle() {
     const label = document.getElementById('availability-label');
 
     try {
-        const response = await fetch('../api/riders/statistics.php');
+        const response = await fetch('../api/riders/statistics.php', { credentials: 'include' });
         const data = await response.json();
         const isAvailable = <?php echo $is_available ? 'true' : 'false'; ?>;
         toggle.checked = isAvailable;
@@ -675,7 +675,7 @@ function updateAvailabilityLabel(isAvailable) {
 
 async function loadActiveDeliveries() {
     try {
-        const response = await fetch('../api/orders/list.php?limit=5');
+        const response = await fetch('../api/orders/list.php?limit=5', { credentials: 'include' });
         const data = await response.json();
 
         if (data.success && data.orders.length > 0) {

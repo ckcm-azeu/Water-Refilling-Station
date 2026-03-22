@@ -183,7 +183,7 @@ function togglePassword(inputId) {
 // Load delivery statistics
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('../api/riders/statistics.php');
+        const response = await fetch('../api/riders/statistics.php', { credentials: 'include' });
         const data = await response.json();
         if (data.success) {
             const stats = data.statistics;
@@ -227,6 +227,7 @@ document.getElementById('profile-form').addEventListener('submit', async functio
         const response = await fetch('../api/accounts/update.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 user_id: <?php echo $_SESSION['user_id']; ?>,
                 full_name: document.getElementById('full_name').value,
@@ -267,6 +268,7 @@ document.getElementById('password-form').addEventListener('submit', async functi
         const response = await fetch('../api/accounts/update.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 user_id: <?php echo $_SESSION['user_id']; ?>,
                 password: newPassword,

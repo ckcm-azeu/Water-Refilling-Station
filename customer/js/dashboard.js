@@ -51,7 +51,7 @@ function animateValue(id, target) {
  */
 async function loadDashboardStats() {
     try {
-        const response = await fetch('../api/analytics/dashboard.php');
+        const response = await fetch('../api/analytics/dashboard.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -71,7 +71,7 @@ async function loadDashboardStats() {
  */
 async function loadRecentOrders() {
     try {
-        const response = await fetch('../api/orders/list.php?limit=5');
+        const response = await fetch('../api/orders/list.php?limit=5', { credentials: 'include' });
         const data = await response.json();
         
         const tbody = document.getElementById('recent-orders-tbody');

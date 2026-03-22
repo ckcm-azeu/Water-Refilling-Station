@@ -35,7 +35,7 @@ async function loadAnalytics() {
 
 async function loadRevenue() {
     try {
-        const response = await fetch(`../api/analytics/revenue.php?period=${currentPeriod}`);
+        const response = await fetch(`../api/analytics/revenue.php?period=${currentPeriod}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -56,7 +56,7 @@ async function loadRevenue() {
 
 async function loadOrderAnalytics() {
     try {
-        const response = await fetch(`../api/analytics/orders.php?period=${currentPeriod}`);
+        const response = await fetch(`../api/analytics/orders.php?period=${currentPeriod}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {

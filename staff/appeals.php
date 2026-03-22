@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadAppeals() {
     try {
         const url = currentStatusFilter ? `../api/appeals/list.php?status=${currentStatusFilter}` : '../api/appeals/list.php';
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
 
         if (data.success && data.appeals.length > 0) {
@@ -590,7 +590,7 @@ function nextPage() {
 
 async function showReview(appealId) {
     try {
-        const response = await fetch('../api/appeals/list.php');
+        const response = await fetch('../api/appeals/list.php', { credentials: 'include' });
         const data = await response.json();
 
         if (data.success) {
@@ -625,6 +625,7 @@ async function reviewAppeal(action) {
         const response = await fetch('../api/appeals/review.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 appeal_id: parseInt(appealId),
                 action: action,

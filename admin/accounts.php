@@ -754,7 +754,7 @@ function formatDate(dateStr) {
 async function loadAccounts() {
     try {
         const url = currentRoleFilter ? `../api/accounts/list.php?role=${currentRoleFilter}` : '../api/accounts/list.php';
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
         
         const tbody = document.getElementById('accounts-tbody');
@@ -991,6 +991,7 @@ async function flagAccount(userId) {
         const response = await fetch('../api/accounts/flag.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, action: 'flag', reason: reason.trim(), csrf_token: getCSRFToken() })
         });
         
@@ -1024,6 +1025,7 @@ async function unflagAccount(userId) {
         const response = await fetch('../api/accounts/flag.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, action: 'unflag', csrf_token: getCSRFToken() })
         });
         
@@ -1053,7 +1055,7 @@ function viewFlagReason(userId) {
 async function editAccount(userId) {
     try {
         // Fetch user details
-        const response = await fetch(`../api/accounts/get.php?id=${userId}`);
+        const response = await fetch(`../api/accounts/get.php?id=${userId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success && data.account) {
@@ -1118,6 +1120,7 @@ async function submitEditAccount(event) {
         const response = await fetch('../api/accounts/update.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         
@@ -1154,6 +1157,7 @@ async function deleteAccount(userId) {
         const response = await fetch('../api/accounts/delete.php', {
             method: 'DELETE',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ 
                 user_id: userId,
                 csrf_token: getCSRFToken() 
@@ -1274,6 +1278,7 @@ async function submitAddAccount(e) {
         const response = await fetch('../api/accounts/create.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         

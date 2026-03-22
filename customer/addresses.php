@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadAddresses() {
     try {
-        const response = await fetch('../api/addresses/list.php');
+        const response = await fetch('../api/addresses/list.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -217,6 +217,7 @@ async function saveAddress(e) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         
@@ -255,8 +256,7 @@ async function deleteAddress(id) {
     try {
         const response = await fetch('../api/addresses/delete.php', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ address_id: id, csrf_token: getCSRFToken() })
+            headers: {'Content-Type': 'application/json'},            credentials: 'include',            body: JSON.stringify({ address_id: id, csrf_token: getCSRFToken() })
         });
         
         const data = await response.json();
@@ -282,8 +282,7 @@ async function setDefaultAddress(id) {
     try {
         const response = await fetch('../api/addresses/set_default.php', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ address_id: id, csrf_token: getCSRFToken() })
+            headers: {'Content-Type': 'application/json'},            credentials: 'include',            body: JSON.stringify({ address_id: id, csrf_token: getCSRFToken() })
         });
         
         const data = await response.json();

@@ -406,7 +406,7 @@ function nextPage() {
  */
 async function viewOrderDetails(orderId) {
     try {
-        const response = await fetch(`../api/orders/get.php?id=${orderId}`);
+        const response = await fetch(`../api/orders/get.php?id=${orderId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {

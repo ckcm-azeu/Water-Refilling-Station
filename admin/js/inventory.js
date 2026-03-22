@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadSettings() {
     try {
-        const response = await fetch('../api/settings/get.php');
+        const response = await fetch('../api/settings/get.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success && data.settings) {
@@ -75,7 +75,7 @@ async function loadSettings() {
 
 async function loadDefaultItems() {
     try {
-        const response = await fetch('../api/settings/get.php');
+        const response = await fetch('../api/settings/get.php', { credentials: 'include' });
         const data = await response.json();
         
         const optionsContainer = document.getElementById('item-select-options');
@@ -127,7 +127,7 @@ function getItemsPerPage() {
 
 async function loadInventory() {
     try {
-        const response = await fetch('../api/inventory/list.php');
+        const response = await fetch('../api/inventory/list.php', { credentials: 'include' });
         const data = await response.json();
         
         const tbody = document.getElementById('inventory-tbody');
@@ -420,6 +420,7 @@ async function saveItem(e) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         
@@ -453,6 +454,7 @@ async function restockItem(e) {
         const response = await fetch('../api/inventory/restock.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 item_id: parseInt(itemId),
                 stock_count: qty,
@@ -477,7 +479,7 @@ async function restockItem(e) {
 
 async function editItem(itemId) {
     try {
-        const response = await fetch(`../api/inventory/get.php?id=${itemId}`);
+        const response = await fetch(`../api/inventory/get.php?id=${itemId}`, { credentials: 'include' });
         const data = await response.json();
         
         if (data.success && data.item) {
@@ -561,6 +563,7 @@ async function deleteItem(itemId, itemName) {
         const response = await fetch('../api/inventory/delete.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({
                 item_id: parseInt(itemId),
                 csrf_token: getCSRFToken()

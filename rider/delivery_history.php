@@ -403,7 +403,7 @@ function applyHistoryFilter() {
 
 async function loadHistory() {
     try {
-        const response = await fetch('../api/orders/list.php?limit=100');
+        const response = await fetch('../api/orders/list.php?limit=100', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {

@@ -179,7 +179,7 @@ function initSortButtons() {
 
 async function loadAssignedDeliveries() {
     try {
-        const response = await fetch('../api/orders/list.php?status=assigned&limit=100');
+        const response = await fetch('../api/orders/list.php?status=assigned&limit=100', { credentials: 'include' });
         const data = await response.json();
 
         if (data.success && data.orders.length > 0) {

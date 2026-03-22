@@ -661,7 +661,7 @@ function formatDate(dateStr) {
 async function loadAccounts() {
     try {
         const url = currentRoleFilter ? `../api/accounts/list.php?role=${currentRoleFilter}&status=active` : '../api/accounts/list.php?status=active';
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
 
         const tbody = document.getElementById('accounts-tbody');
@@ -885,6 +885,7 @@ async function flagAccount(userId) {
         const response = await fetch('../api/accounts/flag.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, action: 'flag', reason: reason.trim(), csrf_token: getCSRFToken() })
         });
 
@@ -918,6 +919,7 @@ async function unflagAccount(userId) {
         const response = await fetch('../api/accounts/flag.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, action: 'unflag', csrf_token: getCSRFToken() })
         });
 

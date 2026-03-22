@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function loadItems() {
     try {
-        const response = await fetch('../api/inventory/list.php?available_only=true');
+        const response = await fetch('../api/inventory/list.php?available_only=true', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -242,7 +242,7 @@ function updateCartSummary() {
  */
 async function loadAddresses() {
     try {
-        const response = await fetch('../api/addresses/list.php');
+        const response = await fetch('../api/addresses/list.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {

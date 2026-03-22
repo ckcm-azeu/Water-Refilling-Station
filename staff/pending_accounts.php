@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadPending() {
     try {
-        const response = await fetch('../api/accounts/list.php?status=pending');
+        const response = await fetch('../api/accounts/list.php?status=pending', { credentials: 'include' });
         const data = await response.json();
 
         if (data.success && data.accounts.length > 0) {
@@ -534,6 +534,7 @@ async function approve(userId) {
         const response = await fetch('../api/accounts/approve.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, csrf_token: getCSRFToken() })
         });
 
@@ -567,6 +568,7 @@ async function deny(userId, fullName) {
         const response = await fetch('../api/accounts/delete.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, csrf_token: getCSRFToken() })
         });
 
@@ -609,6 +611,7 @@ async function approveAll() {
             const response = await fetch('../api/accounts/approve.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
                 body: JSON.stringify({ user_id: acc.id, csrf_token: getCSRFToken() })
             });
             const data = await response.json();

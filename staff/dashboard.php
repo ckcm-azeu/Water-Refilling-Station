@@ -748,7 +748,7 @@ function setGreeting() {
 
 async function loadDashboardStats() {
     try {
-        const response = await fetch('../api/analytics/dashboard.php');
+        const response = await fetch('../api/analytics/dashboard.php', { credentials: 'include' });
         const data = await response.json();
         
         if (data.success) {
@@ -781,7 +781,7 @@ function animateValue(id, target) {
 
 async function loadRecentOrders() {
     try {
-        const response = await fetch('../api/orders/list.php?limit=5');
+        const response = await fetch('../api/orders/list.php?limit=5', { credentials: 'include' });
         const data = await response.json();
         
         const tbody = document.getElementById('recent-orders');
@@ -824,7 +824,7 @@ async function loadRecentOrders() {
 
 async function loadPendingAccounts() {
     try {
-        const response = await fetch('../api/accounts/list.php?status=pending&limit=5');
+        const response = await fetch('../api/accounts/list.php?status=pending&limit=5', { credentials: 'include' });
         const data = await response.json();
         
         const tbody = document.getElementById('pending-accounts-tbody');
@@ -877,6 +877,7 @@ async function approveAccount(userId) {
         const response = await fetch('../api/accounts/approve.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({ user_id: userId, csrf_token: getCSRFToken() })
         });
         
