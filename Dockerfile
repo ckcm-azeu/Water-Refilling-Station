@@ -70,7 +70,7 @@ sed -i "s/<VirtualHost \*:80>/<VirtualHost *:$PORT>/g" /etc/apache2/sites-availa
 # Start Apache
 exec apache2-foreground
 EOF
-chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Step 8: Configure Apache VirtualHost
 RUN cat > /etc/apache2/sites-available/000-default.conf << 'EOF'
