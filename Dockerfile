@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     openssl \
     git \
+    liboniguruma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions for MySQL and encryption
